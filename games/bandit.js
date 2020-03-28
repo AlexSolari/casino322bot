@@ -1,9 +1,16 @@
 class Bandit {
     constructor() {
-        this.wheelValues = ['💰', '💩', '💩', '💩', '🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '❤️', '❤️', '❤️', '❤️', '🍆', '🍆', '🍀'];
+        this.onCooldown = false;
+        this.wheelValues = ['💰', '💩', '💩', '💩', '🗑️','🗑️', '🔥','🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '❤️', '❤️', '❤️', '❤️', '🍆', '🍆', '🍀'];
     }
 
     roll(value, userId, userName, state, api, chatId) {
+        if (this.onCooldown){
+            api.send(`🎱 Заряжаем автомат, подождите...`, chatId);
+            state.users[userId] += value;
+            return;
+        }
+
         let wheel = [...this.wheelValues, ...this.wheelValues, ...this.wheelValues];
         wheel = wheel.sort(() => Math.random() - 0.5);
 
@@ -20,15 +27,15 @@ class Bandit {
         } 
         
         if (high.length > 1) {
-            coeff += (0.9 * high.length);
+            coeff += (0.7 * high.length);
         } 
         
         if (mid.length > 1) {
-            coeff += (0.4 * mid.length);
+            coeff += (0.5 * mid.length);
         } 
         
         if (low.length > 1) {
-            coeff += (0.2 * low.length);
+            coeff += (0.3 * low.length);
         }
         
         if (coeff == 1)
@@ -53,6 +60,9 @@ class Bandit {
             resultMessage += "Никто не выиграл";
 
         api.send(resultMessage, chatId);
+
+        this.onCooldown = true;
+        setTimeout(() => this.onCooldown = false, 2000);
     }
 }
 

@@ -175,6 +175,18 @@ let auctionCommand = new CommandBuilder("Auction.Bet")
     })
     .build();
 
+let helpCommand = new CommandBuilder("General.Help")
+    .on("/help@kazino_chz_bot")
+    .do((state, api, msg, result) => {
+        let message = "❓ *Актуальные команды бота* ❓\n";
+        message += " - баланс _(показывает ваш актуальный баланс)_\n";
+        message += " - топ  _(топ чата по балансу на текущий момент)_\n";
+        message += " - рулетка _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
+        message += " - бандит _(классика игровых слотов)_\n";
+        message += " - аукцион _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
+        api.send(message, msg.chat.id);
+    }).build();
+
 let commands = [balanceCommand, 
     logCommand, 
     plusCommand, 
@@ -183,7 +195,7 @@ let commands = [balanceCommand,
     goCommand, 
     topCommand,
     banditCommand,
-    auctionCommand];
+    auctionCommand,helpCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
 
 games.addGame("roullete", () => new Roullete());

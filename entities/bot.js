@@ -9,9 +9,11 @@ class Bot {
             users: {},
         };
 
+        this.recentMessages = {};
+
         this.api = {
             send: (text, chatId) => {
-                this.bot.sendMessage(chatId, text)
+                this.bot.sendMessage(chatId, text, {parseMode: "Markdown"})
                     .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), 60000));
                 },
             gif: (name, timeout, chatId) => {
@@ -81,11 +83,21 @@ class Bot {
             return;
         }
 
+        if (!this.recentMessages[msg.chat.id])
+            this.recentMessages[msg.chat.id] = [];
+
         if (!this.state.users[msg.from.id])
             this.state.users[msg.from.id] = 300;
 
-        let points = msg.text.length > 25 ? 25 : msg.text.length;
-        this.state.users[msg.from.id] += points;
+        if (this.recentMessages[msg.chat.id].length > 50)
+            this.recentMessages[msg.chat.id].shift();
+
+        if (this.recentMessages[msg.chat.id].indexOf(msg.text) == -1){
+            let points = msg.text.length > 25 ? 25 : msg.text.length;
+            this.state.users[msg.from.id] += points;
+        }
+
+        this.recentMessages[msg.chat.id].push(msg.text);
 
         this.commands.forEach(cmd => {
             cmd.exec(msg.text, this.state, this.api, msg);
