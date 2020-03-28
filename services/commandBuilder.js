@@ -1,4 +1,4 @@
-var Command = require("./command");
+var Command = require("../entities/command");
 
 class CommandBuilder{
     constructor(name){

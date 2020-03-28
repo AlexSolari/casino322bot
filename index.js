@@ -1,8 +1,8 @@
-let CommandBuilder = require("./commandBuilder");
-let Roullete = require("./roullete");
+let CommandBuilder = require("./services/commandBuilder");
+let Roullete = require("./games/roullete");
 
-let games = require("./gamestore");
-let bot = require("./bot");
+let games = require("./services/gamestore");
+let bot = require("./entities/bot");
 const STATE = {
     Idle: 1,
     Betting: 2,

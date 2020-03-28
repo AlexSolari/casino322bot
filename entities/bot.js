@@ -15,7 +15,8 @@ class Bot {
                     .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), 60000));
                 },
             gif: (name, timeout, chatId) => {
-                this.bot.sendAnimation(chatId, `${name}.mp4`)
+                let path = `./content/${name}.mp4`;
+                this.bot.sendAnimation(chatId, path)
                     .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), timeout));
             },
             save: () => this.saveState(),
