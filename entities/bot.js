@@ -5,7 +5,7 @@ class Bot {
     constructor() {
         this.bot = null;
         this.state = {
-            log: [],
+            log: {},
             users: {},
         };
 
@@ -44,7 +44,7 @@ class Bot {
             } else {
                 let loadedData = JSON.parse(data);
                 this.state.users = loadedData.users || {};
-                this.state.log = loadedData.log || [];
+                this.state.log = loadedData.log || {};
             }
         });
     }

@@ -21,7 +21,7 @@ let logCommand = new CommandBuilder("Log")
     .on("лог")
     .do((state, api, msg) => {
         let reply = "Лог:\n";
-        state.log.forEach(e => {
+        (state.log[msg.chat.id] || []).forEach(e => {
             reply += `${e} ${e == 0 ? '💚' : (e % 2 ? '🔴' : '⚫️')}\n`;
         })
         api.send(reply, msg.chat.id);

@@ -106,10 +106,16 @@ class Roullete {
         let result = this.getRandomInt(0, 12);
         let awardRanges = this.getAwardRanges(result);
         let wins = [];
+        let log = state.log[chatId];
+
+        if (!log){
+            log = state.log[chatId] = [];
+        }
         if (state.log.length > 10) {
             state.log.shift();
         }
-        state.log.push(result);
+
+        log.push(result);
 
         let betsThatProcd = this.bets.filter(x => awardRanges.map(z => z.value).indexOf(x.on) != -1);
         betsThatProcd.forEach(b => {
