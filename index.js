@@ -1,5 +1,6 @@
 let CommandBuilder = require("./services/commandBuilder");
 let Roullete = require("./games/roullete");
+let Bandit = require("./games/bandit");
 
 let games = require("./services/gamestore");
 let bot = require("./entities/bot");
@@ -10,14 +11,14 @@ const STATE = {
 }
 
 
-let balanceCommand = new CommandBuilder("Balance")
+let balanceCommand = new CommandBuilder("General.Balance")
     .on("баланс")
     .do((state, api, msg) => {
         api.send(state.users[msg.from.id], msg.chat.id);
     })
     .build();
 
-let logCommand = new CommandBuilder("Log")
+let logCommand = new CommandBuilder("Roullete.Log")
     .on("лог")
     .do((state, api, msg) => {
         let reply = "Лог:\n";
@@ -28,7 +29,7 @@ let logCommand = new CommandBuilder("Log")
     })
     .build();
 
-let plusCommand = new CommandBuilder("Plus")
+let plusCommand = new CommandBuilder("General.Plus")
     .on(/^\+(?<p>\d*).*/gim)
     .when((state, msg) => !!msg.reply_to_message)
     .do((state, api, msg, result) => {
@@ -42,7 +43,7 @@ let plusCommand = new CommandBuilder("Plus")
     })
     .build();
 
-let roulleteCommand = new CommandBuilder("Roullete")
+let roulleteCommand = new CommandBuilder("Roullete.Start")
     .on("рулетка")
     .do((state, api, msg, result) => {
         let game = games.get("roullete", msg.chat.id);
@@ -60,7 +61,7 @@ let roulleteCommand = new CommandBuilder("Roullete")
     })
     .build();
 
-let goCommand = new CommandBuilder("Spin")
+let goCommand = new CommandBuilder("Roullete.Spin")
     .on("го")
     .when((state, msg) => {
         let game = games.get("roullete", msg.chat.id);
@@ -82,7 +83,7 @@ let goCommand = new CommandBuilder("Spin")
     })
     .build();
 
-let betCommand = new CommandBuilder("Bet")
+let betCommand = new CommandBuilder("Roullete.Bet")
     .on(/(?<bet>\d+) (?<on>\S+)/i)
     .when((state, msg) => {
         let game = games.get("roullete", msg.chat.id);
@@ -116,7 +117,7 @@ let betCommand = new CommandBuilder("Bet")
     })
     .build();
 
-let topCommand = new CommandBuilder("Top")
+let topCommand = new CommandBuilder("General.Top")
     .on("топ")
     .do((state, api, msg, result) => {
         let keys = Object.keys(state.users);
@@ -138,6 +139,32 @@ let topCommand = new CommandBuilder("Top")
     })
     .build();
 
-let commands = [balanceCommand, logCommand, plusCommand, roulleteCommand, betCommand, goCommand, topCommand];
+let banditCommand = new CommandBuilder("Bandit.Roll")
+    .on(/бандит (?<bet>\d+)/i)
+    .do((state, api, msg, result) => {
+        let valueToBet = parseInt(result.groups.bet);
+        let game = games.get("bandit", msg.chat.id);
+
+        if (valueToBet && valueToBet > 0) {
+            if (state.users[msg.from.id] < valueToBet) {
+                api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
+            }
+            else {
+                state.users[msg.from.id] -= valueToBet;
+                game.roll(valueToBet, msg.from.id, msg.from.first_name, state, api, msg.chat.id);
+            }
+        }
+    })
+    .build();
+
+let commands = [balanceCommand, 
+    logCommand, 
+    plusCommand, 
+    roulleteCommand, 
+    betCommand, 
+    goCommand, 
+    topCommand,
+    banditCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
 games.addGame("roullete", () => new Roullete());
+games.addGame("bandit", () => new Bandit());
