@@ -44,7 +44,6 @@ let plusCommand = new CommandBuilder("Plus")
 
 let roulleteCommand = new CommandBuilder("Roullete")
     .on("рулетка")
-    .when()
     .do((state, api, msg, result) => {
         if (state.currentState == STATE.Idle){
             api.send("🎲 Минирулетка\n\
