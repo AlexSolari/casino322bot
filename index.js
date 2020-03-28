@@ -99,5 +99,27 @@ let betCommand = new CommandBuilder("Bet")
     })
     .build();
 
-let commands = [balanceCommand, logCommand, plusCommand, roulleteCommand, betCommand, goCommand];
+let topCommand = new CommandBuilder("Top")
+    .on("топ")
+    .do((state, api, msg, result) => {
+        let keys = Object.keys(state.users);
+        let promises = [];
+        let users = keys.map(x => {
+            promises.push(api.getUser(x));
+        })
+        Promise.all(promises).then(res => {
+            let mapped = res.map(u => u.user).map(u => { 
+                return { user: u, points: state.users[u.id] } 
+            }).sort((x, y) => y.points - x.points).slice(0, 5);
+
+            let topmsg = "💰Топ чата💰\n\n";
+            mapped.forEach(u => {
+                topmsg += `${mapped.indexOf(u) + 1}) ${u.user.first_name} - ${u.points}\n`;
+            })
+            api.send(topmsg);
+        });
+    })
+    .build();
+
+let commands = [balanceCommand, logCommand, plusCommand, roulleteCommand, betCommand, goCommand, topCommand];
 commands.forEach(cmd => bot.addCommand(cmd));

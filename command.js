@@ -7,7 +7,6 @@ class Command{
     }
 
     exec(message, state, api, botMessage){
-        console.log(` - Recieved command [${this.name}]`);
         let shouldTrigger = false;
         let matchResult = null;
         

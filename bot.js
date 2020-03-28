@@ -44,7 +44,12 @@ class Bot{
     }
 
     start(token){
-        this.bot = new TeleBot(token);
+        this.bot = new TeleBot({
+            token: token,
+            polling:{
+                interval: 50,
+            }
+        });
         this.bot.on('text', (msg) => {
             console.log(`Recieved message: ${msg.text}`);
 
@@ -61,6 +66,7 @@ class Bot{
                         .then(x => setTimeout(() => this.bot.deleteMessage(msg.chat.id, x.message_id), timeout));
                 },
                 save: () => this.saveState(),
+                getUser: (id) => this.bot.getChatMember(msg.chat.id, id)
             };
 
             if (msg.chat){
