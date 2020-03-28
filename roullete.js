@@ -1,7 +1,14 @@
+const STATE = {
+    Idle: 1,
+    Betting: 2,
+    Spinning: 3,
+}
+
 class Roullete {
     constructor() {
         this.bets = [];
         this.availibleBets = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '0', 'к', "ч", "1-3", '4-6', '7-9', '10-12'];
+        this.state = STATE.Idle;
     }
 
     getRandomInt(min, max) {
@@ -115,6 +122,7 @@ class Roullete {
         });
 
         this.showResults(result, state, api, wins, chatId);
+        this.state = STATE.Idle;
     }
 }
 

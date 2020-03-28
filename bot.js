@@ -1,16 +1,10 @@
 const TeleBot = require('telebot');
 const fs = require('fs');
-const STATE = {
-    Idle: 1,
-    Betting: 2,
-    Spinning: 3,
-}
 
 class Bot {
     constructor() {
         this.bot = null;
         this.state = {
-            currentState: STATE.Idle,
             log: [],
             users: {},
         };

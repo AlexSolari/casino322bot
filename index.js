@@ -1,8 +1,8 @@
 let CommandBuilder = require("./commandBuilder");
 let Roullete = require("./roullete");
 
+let games = require("./gamestore");
 let bot = require("./bot");
-let roulette = new Roullete();
 const STATE = {
     Idle: 1,
     Betting: 2,
@@ -45,13 +45,14 @@ let plusCommand = new CommandBuilder("Plus")
 let roulleteCommand = new CommandBuilder("Roullete")
     .on("рулетка")
     .do((state, api, msg, result) => {
-        if (state.currentState == STATE.Idle){
+        let game = games.get("roullete", msg.chat.id);
+        if (game.state == STATE.Idle){
             api.send("🎲 Минирулетка\n\
 Угадайте число из: \n\
 0💚 \n\
 1🔴 2⚫️ 3🔴 4⚫️ 5🔴 6⚫️\n\
 7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️", msg.chat.id);
-            state.currentState = STATE.Betting;
+            game.state = STATE.Betting;
         }
         else{
             api.send("🎲 Рулетка уже запущена, делайте ставки", msg.chat.id);
@@ -61,32 +62,44 @@ let roulleteCommand = new CommandBuilder("Roullete")
 
 let goCommand = new CommandBuilder("Spin")
     .on("го")
-    .when((state, msg) => state.currentState == STATE.Betting)
+    .when((state, msg) => {
+        let game = games.get("roullete", msg.chat.id);
+
+        return game.state == STATE.Betting;
+    })
     .do((state, api, msg, result) => {
-        state.currentState = STATE.Spinning;
-        api.send("🎲 Крутим...", msg.chat.id);
+        
+        let game = games.get("roullete", msg.chat.id);
         let gifToShow = Math.random() > 0.1 ? "roulette" : "rare_spin";
+
+        game.state = STATE.Spinning;
+        api.send("🎲 Крутим...", msg.chat.id);
         api.gif(gifToShow, 5000, msg.chat.id);
+
         setTimeout(() => {
-            roulette.roll(state, api, msg.chat.id);
-            state.currentState = STATE.Idle;
+            game.roll(state, api, msg.chat.id);
         }, 5500)
     })
     .build();
 
 let betCommand = new CommandBuilder("Bet")
     .on(/(?<bet>\d+) (?<on>\S+)/i)
-    .when((state, msg) => state.currentState == STATE.Betting)
+    .when((state, msg) => {
+        let game = games.get("roullete", msg.chat.id);
+
+        return game.state == STATE.Betting;
+    })
     .do((state, api, msg, result) => {
         let valueToBet = parseInt(result.groups.bet);
         let betOn = result.groups.on;
+        let game = games.get("roullete", msg.chat.id);
 
-        if (valueToBet && valueToBet > 0 && roulette.availibleBets.indexOf(betOn) > -1) {
+        if (valueToBet && valueToBet > 0 && game.availibleBets.indexOf(betOn) > -1) {
             if (state.users[msg.from.id] < valueToBet) {
                 api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
             }
             else {
-                roulette.bet(betOn, valueToBet, msg.from.id, msg.from.first_name);
+                game.bet(betOn, valueToBet, msg.from.id, msg.from.first_name);
                 state.users[msg.from.id] -= valueToBet;
 
                 let onMarker = betOn;
@@ -127,3 +140,4 @@ let topCommand = new CommandBuilder("Top")
 
 let commands = [balanceCommand, logCommand, plusCommand, roulleteCommand, betCommand, goCommand, topCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
+games.addGame("roullete", () => new Roullete());
