@@ -14,22 +14,25 @@ class Bandit {
         let high = rolls.filter(x => x == '🍆' || x == '💰');
         let top = rolls.filter(x => x == '🍀' || x == '💰');
 
-        let coeff = 0;
+        let coeff = 1;
         if (top.length > 1) {
-            coeff = 1 + (1.2 * top.length);
+            coeff += (1.2 * top.length);
         } 
         
         if (high.length > 1) {
-            coeff = 1 + (0.9 * high.length);
+            coeff += (0.9 * high.length);
         } 
         
         if (mid.length > 1) {
-            coeff = 1 + (0.4 * mid.length);
+            coeff += (0.4 * mid.length);
         } 
         
         if (low.length > 1) {
-            coeff = 1 + (0.2 * low.length);
+            coeff += (0.2 * low.length);
         }
+        
+        if (coeff == 1)
+            coeff = 0;
 
         let bonus = rolls.filter(x => x == '💰').length == 1;
 
