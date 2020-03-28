@@ -51,7 +51,7 @@ class Roullete {
     }
 
     showResults(value, state, api, wins) {
-        var resultMessage = `Рулетка: ${value} ${value == 0 ? '💚' : (value % 2 ? '🔴' : '⚫️')}\n`;
+        var resultMessage = `🎲 Рулетка: ${value} ${value == 0 ? '💚' : (value % 2 ? '🔴' : '⚫️')}\n`;
         
         this.bets.forEach(bet => {
             let optional = "";

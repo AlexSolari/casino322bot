@@ -44,14 +44,19 @@ let plusCommand = new CommandBuilder("Plus")
 
 let roulleteCommand = new CommandBuilder("Roullete")
     .on("рулетка")
-    .when((state, msg) => state.currentState == STATE.Idle)
+    .when()
     .do((state, api, msg, result) => {
-        api.send("Минирулетка\n\
+        if (state.currentState == STATE.Idle){
+            api.send("🎲 Минирулетка\n\
 Угадайте число из: \n\
 0💚 \n\
 1🔴 2⚫️ 3🔴 4⚫️ 5🔴 6⚫️\n\
 7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️");
-        state.currentState = STATE.Betting;
+            state.currentState = STATE.Betting;
+        }
+        else{
+            send("🎲 Рулетка уже запущена, делайте ставки");
+        }
     })
     .build();
 
@@ -60,7 +65,7 @@ let goCommand = new CommandBuilder("Spin")
     .when((state, msg) => state.currentState == STATE.Betting)
     .do((state, api, msg, result) => {
         state.currentState = STATE.Spinning;
-        api.send("Крутим...");
+        api.send("🎲 Крутим...");
         let gifToShow = Math.random() > 0.1 ? "roulette" : "rare_spin";
         api.gif(gifToShow, 5000);
         setTimeout(() => {
@@ -79,7 +84,7 @@ let betCommand = new CommandBuilder("Bet")
 
         if (valueToBet && valueToBet > 0 && roulette.availibleBets.indexOf(betOn) > -1) {
             if (state.users[msg.from.id] < valueToBet) {
-                api.send(`Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`);
+                api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`);
             }
             else {
                 roulette.bet(betOn, valueToBet, msg.from.id, msg.from.first_name);
@@ -93,7 +98,7 @@ let betCommand = new CommandBuilder("Bet")
                 if (betOn == '0')
                     onMarker = '💚';
 
-                api.send(`Ставка принята: ${msg.from.first_name} ${valueToBet} на ${onMarker}`);
+                api.send(`🎲 Ставка принята: ${msg.from.first_name} ${valueToBet} на ${onMarker}`);
             }
         }
     })
