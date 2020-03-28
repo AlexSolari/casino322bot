@@ -1,7 +1,8 @@
 var Command = require("./command");
 
 class CommandBuilder{
-    constructor(){
+    constructor(name){
+        this.name = name;
         this.trigger = null;
         this.condition = () => true;
         this.handler = () => {};
@@ -26,7 +27,7 @@ class CommandBuilder{
     }
 
     build(){
-        return new Command(this.trigger, this.condition, this.handler);
+        return new Command(this.trigger, this.condition, this.handler, this.name);
     }
 }
 

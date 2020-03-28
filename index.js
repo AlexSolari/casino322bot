@@ -10,14 +10,14 @@ const STATE = {
 }
 
 
-let balanceCommand = new CommandBuilder()
+let balanceCommand = new CommandBuilder("Balance")
     .on("баланс")
     .do((state, api, msg) => {
         api.send(state.users[msg.from.id]);
     })
     .build();
 
-let logCommand = new CommandBuilder()
+let logCommand = new CommandBuilder("Log")
     .on("лог")
     .do((state, api, msg) => {
         let reply = "Лог:\n";
@@ -28,7 +28,7 @@ let logCommand = new CommandBuilder()
     })
     .build();
 
-let plusCommand = new CommandBuilder()
+let plusCommand = new CommandBuilder("Plus")
     .on(/\+(?<p>\d*).*/gm)
     .when((state, msg) => !!msg.reply_to_message)
     .do((state, api, msg, result) => {
@@ -42,7 +42,7 @@ let plusCommand = new CommandBuilder()
     })
     .build();
 
-let roulleteCommand = new CommandBuilder()
+let roulleteCommand = new CommandBuilder("Roullete")
     .on("рулетка")
     .when((state, msg) => state.currentState == STATE.Idle)
     .do((state, api, msg, result) => {
@@ -55,7 +55,7 @@ let roulleteCommand = new CommandBuilder()
     })
     .build();
 
-let goCommand = new CommandBuilder()
+let goCommand = new CommandBuilder("Spin")
     .on("го")
     .when((state, msg) => state.currentState == STATE.Betting)
     .do((state, api, msg, result) => {
@@ -70,7 +70,7 @@ let goCommand = new CommandBuilder()
     })
     .build();
 
-let betCommand = new CommandBuilder()
+let betCommand = new CommandBuilder("Bet")
     .on(/(?<bet>\d+) (?<on>\S+)/gm)
     .when((state, msg) => state.currentState == STATE.Betting)
     .do((state, api, msg, result) => {

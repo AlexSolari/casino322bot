@@ -46,6 +46,8 @@ class Bot{
     start(token){
         this.bot = new TeleBot(token);
         this.bot.on('text', (msg) => {
+            console.log(`Recieved message: ${msg.text}`);
+
             if (!this.state.users[msg.from.id])
                 this.state.users[msg.from.id] = 300;
     

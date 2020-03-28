@@ -1,11 +1,13 @@
 class Command{
-    constructor(trigger, condition, handler){
+    constructor(trigger, condition, handler, name){
         this.trigger = trigger;
         this.condition = condition;
         this.handler = handler;
+        this.name = name;
     }
 
     exec(message, state, api, botMessage){
+        console.log(` - Recieved command [${this.name}]`);
         let shouldTrigger = false;
         let matchResult = null;
         
@@ -18,6 +20,7 @@ class Command{
         }
 
         if (shouldTrigger && this.condition(state, botMessage)){
+            console.log(` - Executing [${this.name}]`);
             this.handler(state, api, botMessage, matchResult);
         }
     }
