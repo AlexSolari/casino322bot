@@ -78,7 +78,7 @@ let betCommand = new CommandBuilder()
 
         if (valueToBet && valueToBet > 0 && roulette.availibleBets.indexOf(betOn) > -1) {
             if (state.users[msg.from.id] * 0.75 < valueToBet) {
-                api.send(`Ставка не может превышать 75% от твоих средств. Баланс ${users[msg.from.id]}, ставка ${valueToBet}`);
+                api.send(`Ставка не может превышать 75% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`);
             }
             else {
                 roulette.bet(betOn, valueToBet, msg.from.id, msg.from.first_name);
