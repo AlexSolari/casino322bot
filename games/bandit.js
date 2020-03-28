@@ -1,6 +1,6 @@
 class Bandit {
     constructor() {
-        this.wheelValues = ['🔥','🔥','🔥','🔥','❤️','❤️','❤️','🍆','🍆','🍀'];
+        this.wheelValues = ['💩', '💩', '💩', '🔥','🔥','🔥','🔥','🔥','🔥','❤️','❤️','❤️','❤️','🍆','🍆','🍀'];
     }
 
     roll(value, userId, userName, state, api, chatId){
@@ -16,10 +16,10 @@ class Bandit {
 
         let coeff = 0;
         if (low.length > 1){
-            coeff = 1 + (0.3 * low.length);
+            coeff = 1 + (0.2 * low.length);
         }
         else if (mid.length > 1){
-            coeff = 1 + (0.6 * mid.length);
+            coeff = 1 + (0.4 * mid.length);
         }
         else if (high.length > 1){
             coeff = 1 + (0.9 * high.length);
