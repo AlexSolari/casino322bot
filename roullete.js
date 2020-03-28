@@ -50,7 +50,7 @@ class Roullete {
         return awardRanges;
     }
 
-    showResults(value, state, api, wins) {
+    showResults(value, state, api, wins, chatId) {
         var resultMessage = `🎲 Рулетка: ${value} ${value == 0 ? '💚' : (value % 2 ? '🔴' : '⚫️')}\n`;
         
         this.bets.forEach(bet => {
@@ -81,10 +81,10 @@ class Roullete {
             resultMessage += "Никто не выиграл";
         }
 
-        api.send(resultMessage);
+        api.send(resultMessage, chatId);
 
         if (wins.length == 0) {
-            api.gif("noone", 10000);
+            api.gif("noone", 10000, chatId);
         }
 
         this.bets = [];
@@ -95,7 +95,7 @@ class Roullete {
         this.bets.push({ on, value, userId, userName });
     }
 
-    roll(state, api) {
+    roll(state, api, chatId) {
         let result = this.getRandomInt(0, 12);
         let awardRanges = this.getAwardRanges(result);
         let wins = [];
@@ -114,7 +114,7 @@ class Roullete {
             });
         });
 
-        this.showResults(result, state, api, wins);
+        this.showResults(result, state, api, wins, chatId);
     }
 }
 

@@ -13,7 +13,7 @@ const STATE = {
 let balanceCommand = new CommandBuilder("Balance")
     .on("баланс")
     .do((state, api, msg) => {
-        api.send(state.users[msg.from.id]);
+        api.send(state.users[msg.from.id], msg.chat.id);
     })
     .build();
 
@@ -24,12 +24,12 @@ let logCommand = new CommandBuilder("Log")
         state.log.forEach(e => {
             reply += `${e} ${e == 0 ? '💚' : (e % 2 ? '🔴' : '⚫️')}\n`;
         })
-        api.send(reply);
+        api.send(reply, msg.chat.id);
     })
     .build();
 
 let plusCommand = new CommandBuilder("Plus")
-    .on(/\+(?<p>\d*).*/gm)
+    .on(/^\+(?<p>\d*).*/gim)
     .when((state, msg) => !!msg.reply_to_message)
     .do((state, api, msg, result) => {
         var amount = 1;
@@ -37,7 +37,7 @@ let plusCommand = new CommandBuilder("Plus")
         if (state.users[msg.from.id] >= amount) {
             state.users[msg.from.id] -= amount;
             state.users[msg.reply_to_message.from.id] += amount;
-            api.send(`${msg.from.first_name} перевел ${msg.reply_to_message.from.first_name} ${amount} монет`);
+            api.send(`${msg.from.first_name} перевел ${msg.reply_to_message.from.first_name} ${amount} монет`, msg.chat.id);
         }
     })
     .build();
@@ -50,11 +50,11 @@ let roulleteCommand = new CommandBuilder("Roullete")
 Угадайте число из: \n\
 0💚 \n\
 1🔴 2⚫️ 3🔴 4⚫️ 5🔴 6⚫️\n\
-7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️");
+7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️", msg.chat.id);
             state.currentState = STATE.Betting;
         }
         else{
-            api.send("🎲 Рулетка уже запущена, делайте ставки");
+            api.send("🎲 Рулетка уже запущена, делайте ставки", msg.chat.id);
         }
     })
     .build();
@@ -64,18 +64,18 @@ let goCommand = new CommandBuilder("Spin")
     .when((state, msg) => state.currentState == STATE.Betting)
     .do((state, api, msg, result) => {
         state.currentState = STATE.Spinning;
-        api.send("🎲 Крутим...");
+        api.send("🎲 Крутим...", msg.chat.id);
         let gifToShow = Math.random() > 0.1 ? "roulette" : "rare_spin";
-        api.gif(gifToShow, 5000);
+        api.gif(gifToShow, 5000, msg.chat.id);
         setTimeout(() => {
-            roulette.roll(state, api);
+            roulette.roll(state, api, msg.chat.id);
             state.currentState = STATE.Idle;
         }, 5500)
     })
     .build();
 
 let betCommand = new CommandBuilder("Bet")
-    .on(/(?<bet>\d+) (?<on>\S+)/gm)
+    .on(/(?<bet>\d+) (?<on>\S+)/i)
     .when((state, msg) => state.currentState == STATE.Betting)
     .do((state, api, msg, result) => {
         let valueToBet = parseInt(result.groups.bet);
@@ -83,7 +83,7 @@ let betCommand = new CommandBuilder("Bet")
 
         if (valueToBet && valueToBet > 0 && roulette.availibleBets.indexOf(betOn) > -1) {
             if (state.users[msg.from.id] < valueToBet) {
-                api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`);
+                api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
             }
             else {
                 roulette.bet(betOn, valueToBet, msg.from.id, msg.from.first_name);
@@ -97,7 +97,7 @@ let betCommand = new CommandBuilder("Bet")
                 if (betOn == '0')
                     onMarker = '💚';
 
-                api.send(`🎲 Ставка принята: ${msg.from.first_name} ${valueToBet} на ${onMarker}`);
+                api.send(`🎲 Ставка принята: ${msg.from.first_name} ${valueToBet} на ${onMarker}`, msg.chat.id);
             }
         }
     })
@@ -109,7 +109,7 @@ let topCommand = new CommandBuilder("Top")
         let keys = Object.keys(state.users);
         let promises = [];
         let users = keys.map(x => {
-            promises.push(api.getUser(x));
+            promises.push(api.getUser(x, msg.chat.id));
         })
         Promise.all(promises).then(res => {
             let mapped = res.map(u => u.user).map(u => { 
@@ -120,7 +120,7 @@ let topCommand = new CommandBuilder("Top")
             mapped.forEach(u => {
                 topmsg += `${mapped.indexOf(u) + 1}) ${u.user.first_name} - ${u.points}\n`;
             })
-            api.send(topmsg);
+            api.send(topmsg, msg.chat.id);
         });
     })
     .build();

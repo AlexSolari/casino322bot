@@ -14,7 +14,6 @@ class Command{
             shouldTrigger = message.toLowerCase() == this.trigger;
         } else{
             matchResult = this.trigger.exec(message);
-
             shouldTrigger = matchResult && matchResult.length > 0;
         }
 
