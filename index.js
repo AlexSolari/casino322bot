@@ -54,7 +54,7 @@ let roulleteCommand = new CommandBuilder("Roullete")
             state.currentState = STATE.Betting;
         }
         else{
-            send("🎲 Рулетка уже запущена, делайте ставки");
+            api.send("🎲 Рулетка уже запущена, делайте ставки");
         }
     })
     .build();
