@@ -55,7 +55,7 @@ class Roullete {
         
         this.bets.forEach(bet => {
             let optional = "";
-            if (value == 0) {
+            if (value == 0 && bet.on != "0") {
                 let refund = Math.floor(bet.value / 2);
                 state.users[bet.userId] += refund;
                 optional = `. Возврат ${refund}.`;
