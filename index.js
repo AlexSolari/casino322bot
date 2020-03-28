@@ -15,14 +15,14 @@ const STATE = {
 let balanceCommand = new CommandBuilder("General.Balance")
     .on("баланс")
     .do((state, api, msg) => {
-        api.send(state.users[msg.from.id], msg.chat.id);
+        api.send(`🏦 ${state.users[msg.from.id]}`, msg.chat.id);
     })
     .build();
 
 let logCommand = new CommandBuilder("Roullete.Log")
     .on("лог")
     .do((state, api, msg) => {
-        let reply = "Лог:\n";
+        let reply = "💬 Лог:\n";
         (state.log[msg.chat.id] || []).forEach(e => {
             reply += `${e} ${e == 0 ? '💚' : (e % 2 ? '🔴' : '⚫️')}\n`;
         })
@@ -39,7 +39,7 @@ let plusCommand = new CommandBuilder("General.Plus")
         if (state.users[msg.from.id] >= amount) {
             state.users[msg.from.id] -= amount;
             state.users[msg.reply_to_message.from.id] += amount;
-            api.send(`${msg.from.first_name} перевел ${msg.reply_to_message.from.first_name} ${amount} монет`, msg.chat.id);
+            api.send(`💸 ${msg.from.first_name} перевел ${msg.reply_to_message.from.first_name} ${amount} монет`, msg.chat.id);
         }
     })
     .build();
@@ -131,7 +131,7 @@ let topCommand = new CommandBuilder("General.Top")
                 return { user: u, points: state.users[u.id] } 
             }).sort((x, y) => y.points - x.points).slice(0, 5);
 
-            let topmsg = "💰Топ чата💰\n\n";
+            let topmsg = "💰 Топ чата 💰\n\n";
             mapped.forEach(u => {
                 topmsg += `${mapped.indexOf(u) + 1}) ${u.user.first_name} - ${u.points}\n`;
             })
