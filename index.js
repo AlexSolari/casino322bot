@@ -61,7 +61,8 @@ let goCommand = new CommandBuilder()
     .do((state, api, msg, result) => {
         state.currentState = STATE.Spinning;
         api.send("Крутим...");
-        api.gif("roulette", 5000);
+        let gifToShow = Math.random() > 0.1 ? "rouletter" : "rare_spin";
+        api.gif(gifToShow, 5000);
         setTimeout(() => {
             roulette.roll(state, api);
             state.currentState = STATE.Idle;
