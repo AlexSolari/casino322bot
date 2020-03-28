@@ -111,8 +111,8 @@ class Roullete {
         if (!log){
             log = state.log[chatId] = [];
         }
-        if (state.log.length > 10) {
-            state.log.shift();
+        while(log > 10) {
+            log.shift();
         }
 
         log.push(result);
