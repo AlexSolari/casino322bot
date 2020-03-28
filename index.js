@@ -1,6 +1,7 @@
 let CommandBuilder = require("./services/commandBuilder");
 let Roullete = require("./games/roullete");
 let Bandit = require("./games/bandit");
+let Auction = require("./games/auction");
 
 let games = require("./services/gamestore");
 let bot = require("./entities/bot");
@@ -157,6 +158,23 @@ let banditCommand = new CommandBuilder("Bandit.Roll")
     })
     .build();
 
+let auctionCommand = new CommandBuilder("Auction.Bet")
+    .on(/аукцион (?<bet>\d+)/i)
+    .do((state, api, msg, result) => {
+        let valueToBet = parseInt(result.groups.bet);
+        let game = games.get("auction", msg.chat.id);
+
+        if (valueToBet && valueToBet > 0) {
+            if (game.inProgress){
+                game.bet(valueToBet, msg.from.id, msg.from.first_name, state, api, msg.chat.id);
+            }
+            else{
+                game.start(valueToBet, msg.from.id, msg.from.first_name, state, api, msg.chat.id);
+            }
+        }
+    })
+    .build();
+
 let commands = [balanceCommand, 
     logCommand, 
     plusCommand, 
@@ -164,7 +182,10 @@ let commands = [balanceCommand,
     betCommand, 
     goCommand, 
     topCommand,
-    banditCommand];
+    banditCommand,
+    auctionCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
+
 games.addGame("roullete", () => new Roullete());
+games.addGame("auction", () => new Auction());
 games.addGame("bandit", () => new Bandit());
