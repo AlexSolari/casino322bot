@@ -27,15 +27,15 @@ class Bandit {
         } 
         
         if (high.length > 1) {
-            coeff += (0.7 * high.length);
+            coeff += (0.8 * high.length);
         } 
         
         if (mid.length > 1) {
-            coeff += (0.5 * mid.length);
+            coeff += (0.3 * mid.length);
         } 
         
         if (low.length > 1) {
-            coeff += (0.3 * low.length);
+            coeff += (0.15 * low.length);
         }
         
         if (coeff == 1)
