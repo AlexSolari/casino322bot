@@ -41,7 +41,7 @@ class Bandit {
         if (coeff == 1)
             coeff = 0;
 
-        let bonus = rolls.filter(x => x == '💰').length == 1;
+        let bonus = rolls.filter(x => x == '💰');
 
         let prize = Math.floor(value * coeff);
         state.users[userId] += prize;
@@ -51,9 +51,9 @@ class Bandit {
         if (prize > 0) {
             resultMessage += `${userName} выиграл ${prize}`;
 
-            if (bonus) {
-                state.users[userId] += value;
-                resultMessage += `\nБонус за 💰: ${value}`;
+            if (bonus.length > 0) {
+                state.users[userId] += value * bonus.length;
+                resultMessage += `\nБонус за 💰: ${ value * bonus.length}`;
             }
         }
         else
