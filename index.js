@@ -4,6 +4,7 @@ let Bandit = require("./games/bandit");
 let Auction = require("./games/auction");
 
 let games = require("./services/gamestore");
+let promos = require("./services/promoService");
 let bot = require("./entities/bot");
 const STATE = {
     Idle: 1,
@@ -179,13 +180,28 @@ let helpCommand = new CommandBuilder("General.Help")
     .on(["/help@kazino_chz_bot", "/help"])
     .do((state, api, msg, result) => {
         let message = "❓ *Актуальные команды бота* ❓\n";
-        message += " - баланс _(показывает ваш актуальный баланс)_\n";
-        message += " - топ  _(топ чата по балансу на текущий момент)_\n";
-        message += " - рулетка _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
-        message += " - бандит _(классика игровых слотов)_\n";
-        message += " - аукцион _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
+        message += " - *баланс* _(показывает ваш актуальный баланс)_\n";
+        message += " - *топ*  _(топ чата по балансу на текущий момент)_\n";
+        message += " - *рулетка [ставка]* _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
+        message += " - *бандит [ставка]* _(классика игровых слотов)_\n";
+        message += " - *аукцион [ставка]* _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
+        message += " - *промо [код]* _(активация промокода)_\n";
         api.send(message, msg.chat.id);
     }).build();
+
+let promoCommand = new CommandBuilder("General.Promo")
+    .on(/промо (?<code>.+)/i)
+    .do((state, api, msg, result) => {
+        let code = result.groups.code;
+
+        promos.checkCode(code, (matchedCodes) => {
+            matchedCodes.forEach(c => {
+                state.users[msg.from.id] += c.award;
+                api.send(`🏆 Промокод '${c.code}' активирован. Добавлено ${c.award} монет.`, msg.chat.id);
+            });
+        })
+    })
+    .build();
 
 let commands = [balanceCommand, 
     logCommand, 
@@ -195,7 +211,9 @@ let commands = [balanceCommand,
     goCommand, 
     topCommand,
     banditCommand,
-    auctionCommand,helpCommand];
+    auctionCommand,
+    helpCommand,
+    promoCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
 
 games.addGame("roullete", () => new Roullete());
