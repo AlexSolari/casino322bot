@@ -176,7 +176,7 @@ let auctionCommand = new CommandBuilder("Auction.Bet")
     .build();
 
 let helpCommand = new CommandBuilder("General.Help")
-    .on("/help@kazino_chz_bot")
+    .on(["/help@kazino_chz_bot", "/help"])
     .do((state, api, msg, result) => {
         let message = "❓ *Актуальные команды бота* ❓\n";
         message += " - баланс _(показывает ваш актуальный баланс)_\n";
