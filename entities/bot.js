@@ -63,7 +63,7 @@ class Bot {
             }
         });
         this.bot.on('text', (msg) => {
-            console.log(`Recieved message: ${msg.text}`);
+            console.log(`${msg.chat.id} | Recieved message: ${msg.text}`);
             this.commandQueue.push(msg);
         });
 

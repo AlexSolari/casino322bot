@@ -1,3 +1,5 @@
+var allSettled = require('promise.allsettled');
+
 let CommandBuilder = require("./services/commandBuilder");
 let Roullete = require("./games/roullete");
 let Bandit = require("./games/bandit");
@@ -127,8 +129,8 @@ let topCommand = new CommandBuilder("General.Top")
         let users = keys.map(x => {
             promises.push(api.getUser(x, msg.chat.id));
         })
-        Promise.all(promises).then(res => {
-            let mapped = res.map(u => u.user).map(u => { 
+        allSettled(promises).then(res => {
+            let mapped = res.filter(u => u.status == "fulfilled").map(u => u.value.user).map(u => { 
                 return { user: u, points: state.users[u.id] } 
             }).sort((x, y) => y.points - x.points).slice(0, 5);
 
