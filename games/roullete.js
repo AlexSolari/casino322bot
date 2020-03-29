@@ -40,26 +40,27 @@ class Roullete {
         }
 
         let rangeValue = "";
-        if (value > 0 && value <= 3)
-            rangeValue = "1-3";
-        else if (value <= 6)
-            rangeValue = "4-6";
-        else if (value <= 9)
-            rangeValue = "7-9";
-        else
-            rangeValue = "10-12";
+        if (value > 0) {
+            if (value <= 3)
+                rangeValue = "1-3";
+            else if (value <= 6)
+                rangeValue = "4-6";
+            else if (value <= 9)
+                rangeValue = "7-9";
+            else
+                rangeValue = "10-12";
 
-        awardRanges.push({
-            value: rangeValue,
-            coeff: 4
-        });
-
+            awardRanges.push({
+                value: rangeValue,
+                coeff: 4
+            });
+        }
         return awardRanges;
     }
 
     showResults(value, state, api, wins, chatId) {
         var resultMessage = `🎲 Рулетка: ${value} ${value == 0 ? '💚' : (value % 2 ? '🔴' : '⚫️')}\n`;
-        
+
         this.bets.forEach(bet => {
             let optional = "";
             if (value == 0 && bet.on != "0") {
@@ -108,10 +109,10 @@ class Roullete {
         let wins = [];
         let log = state.log[chatId];
 
-        if (!log){
+        if (!log) {
             log = state.log[chatId] = [];
         }
-        while(log.length > 10) {
+        while (log.length > 10) {
             log.shift();
         }
 
