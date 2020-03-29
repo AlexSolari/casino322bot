@@ -1,3 +1,7 @@
+const {
+    performance
+  } = require('perf_hooks');
+
 class Command{
     constructor(trigger, condition, handler, name){
         this.trigger = trigger;
@@ -25,7 +29,10 @@ class Command{
 
         if (shouldTrigger && this.condition(state, botMessage)){
             console.log(` - Executing [${this.name}]`);
+            var t0 = performance.now();
             this.handler(state, api, botMessage, matchResult);
+            var t1 = performance.now();
+            console.log(` - [${this.name}] took ${(t1 - t0).toFixed(3)} ms.`);
         }
     }
 
