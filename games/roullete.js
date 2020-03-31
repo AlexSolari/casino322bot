@@ -1,8 +1,5 @@
-const STATE = {
-    Idle: 1,
-    Betting: 2,
-    Spinning: 3,
-}
+const STATE = require("../helpers/roulleteState");
+let AwardModel = require("../helpers/roulleteAwardModel");
 
 class Roullete {
     constructor() {
@@ -18,24 +15,13 @@ class Roullete {
     }
 
     getAwardRanges(value) {
-        let awardRanges = [
-            {
-                value: value.toString(),
-                coeff: 13
-            }
-        ];
+        let awardRanges = [new AwardModel(value.toString(), 13)];
 
         if (value != 0) {
             if (value % 2 == 0) {
-                awardRanges.push({
-                    value: "ч",
-                    coeff: 2
-                });
+                awardRanges.push(new AwardModel("ч", 2));
             } else {
-                awardRanges.push({
-                    value: "к",
-                    coeff: 2
-                });
+                awardRanges.push(new AwardModel("к", 2));
             }
         }
 
@@ -50,10 +36,7 @@ class Roullete {
             else
                 rangeValue = "10-12";
 
-            awardRanges.push({
-                value: rangeValue,
-                coeff: 4
-            });
+            awardRanges.push(new AwardModel(rangeValue, 4));
         }
         return awardRanges;
     }
@@ -99,8 +82,8 @@ class Roullete {
         api.save();
     }
 
-    start(api, chatId){
-        if (this.state == STATE.Idle){
+    start(api, chatId) {
+        if (this.state == STATE.Idle) {
             api.send("🎲 Минирулетка\n\
 Угадайте число из: \n\
 0💚 \n\
@@ -108,12 +91,12 @@ class Roullete {
 7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️", chatId);
             this.state = STATE.Betting;
         }
-        else{
+        else {
             api.send("🎲 Рулетка уже запущена, делайте ставки", chatId);
         }
     }
 
-    showLog(state, api, chatId){
+    showLog(state, api, chatId) {
         let reply = "💬 Лог:\n";
         (state.log[chatId] || []).forEach(e => {
             reply += `${e} ${e == 0 ? '💚' : (e % 2 ? '🔴' : '⚫️')}\n`;

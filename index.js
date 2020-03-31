@@ -9,11 +9,7 @@ let Dice = require("./games/dice");
 let games = require("./services/gamestore");
 let promos = require("./services/promoService");
 let bot = require("./entities/bot");
-const STATE = {
-    Idle: 1,
-    Betting: 2,
-    Spinning: 3,
-}
+const STATE = require("./helpers/roulleteState");
 
 let generalCommands = (() => {
     let balanceCommand = new CommandBuilder("General.Balance")
@@ -59,6 +55,28 @@ let generalCommands = (() => {
         })
         .build();
 
+    let bottomCommand = new CommandBuilder("General.Bottom")
+        .on("боттом")
+        .do((state, api, msg, result) => {
+            let keys = Object.keys(state.users);
+            let promises = [];
+            let users = keys.map(x => {
+                promises.push(api.getUser(x, msg.chat.id));
+            })
+            allSettled(promises).then(res => {
+                let mapped = res.filter(u => u.status == "fulfilled").map(u => u.value.user).map(u => {
+                    return { user: u, points: state.users[u.id] }
+                }).filter(x => x.points).sort((x, y) => x.points - y.points).slice(0, 5);
+
+                let topmsg = "🗑️ Боттом чата 🗑️\n\n";
+                mapped.forEach(u => {
+                    topmsg += `${mapped.indexOf(u) + 1}) ${u.user.first_name} - ${u.points}\n`;
+                })
+                api.send(topmsg, msg.chat.id);
+            });
+        })
+        .build();
+
     let helpCommand = new CommandBuilder("General.Help")
         .on(["/help@chz_casino_bot", "/help"])
         .do((state, api, msg, result) => {
@@ -90,6 +108,7 @@ let generalCommands = (() => {
     return [balanceCommand,
         plusCommand,
         topCommand,
+        bottomCommand,
         helpCommand,
         promoCommand];
 })();

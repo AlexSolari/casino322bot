@@ -14,18 +14,15 @@ class Command{
         let shouldTrigger = false;
         let matchResult = null;
         
-        if (Array.isArray(this.trigger)){
-            this.trigger.forEach(t => {
-                let check = this.checkTrigger(message, t);
-                shouldTrigger = shouldTrigger || check.shouldTrigger;
-                matchResult = check.matchResult || matchResult
-            });
-        }else{
-            let check = this.checkTrigger(message, this.trigger);
-            shouldTrigger = shouldTrigger || check.shouldTrigger;
-            matchResult = check.matchResult || matchResult
+        if (!Array.isArray(this.trigger)){
+            this.trigger = [this.trigger];
         }
 
+        this.trigger.forEach(t => {
+            let check = this.checkTrigger(message, t);
+            shouldTrigger = shouldTrigger || check.shouldTrigger;
+            matchResult = check.matchResult || matchResult
+        });
 
         if (shouldTrigger && this.condition(state, botMessage)){
             console.log(` - Executing [${this.name}]`);
