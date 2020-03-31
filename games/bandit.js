@@ -40,6 +40,9 @@ class Bandit {
         
         if (coeff == 1)
             coeff = 0;
+        
+        if (top.length == 3 || high.length == 3 || mid.length == 3 || low.length == 3)
+            coeff += 1.5;
 
         let bonus = rolls.filter(x => x == '💰');
 
@@ -62,7 +65,7 @@ class Bandit {
         api.send(resultMessage, chatId);
 
         this.onCooldown = true;
-        setTimeout(() => this.onCooldown = false, 2000);
+        setTimeout(() => this.onCooldown = false, 500);
     }
 }
 

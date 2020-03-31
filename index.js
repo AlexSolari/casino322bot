@@ -4,6 +4,7 @@ let CommandBuilder = require("./services/commandBuilder");
 let Roullete = require("./games/roullete");
 let Bandit = require("./games/bandit");
 let Auction = require("./games/auction");
+let Dice = require("./games/dice");
 
 let games = require("./services/gamestore");
 let promos = require("./services/promoService");
@@ -80,10 +81,11 @@ let goCommand = new CommandBuilder("Roullete.Spin")
         game.state = STATE.Spinning;
         api.send("🎲 Крутим...", msg.chat.id);
         api.gif(gifToShow, 5000, msg.chat.id);
+        api.sendRollingMessage(msg.chat.id);
 
         setTimeout(() => {
             game.roll(state, api, msg.chat.id);
-        }, 5500)
+        }, 6500)
     })
     .build();
 
@@ -179,7 +181,7 @@ let auctionCommand = new CommandBuilder("Auction.Bet")
     .build();
 
 let helpCommand = new CommandBuilder("General.Help")
-    .on(["/help@kazino_chz_bot", "/help"])
+    .on(["/help@chz_casino_bot", "/help"])
     .do((state, api, msg, result) => {
         let message = "❓ *Актуальные команды бота* ❓\n";
         message += " - *баланс* _(показывает ваш актуальный баланс)_\n";
@@ -187,6 +189,7 @@ let helpCommand = new CommandBuilder("General.Help")
         message += " - *рулетка [ставка]* _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
         message += " - *бандит [ставка]* _(классика игровых слотов)_\n";
         message += " - *аукцион [ставка]* _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
+        message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
         message += " - *промо [код]* _(активация промокода)_\n";
         api.send(message, msg.chat.id);
     }).build();
@@ -205,6 +208,34 @@ let promoCommand = new CommandBuilder("General.Promo")
     })
     .build();
 
+let diceCommand = new CommandBuilder("Dice.Roll")
+    .on(/куб (?<bet>\d+) (?<on>\d)/i)
+    .do((state, api, msg, result) => {
+        let valueToBet = parseInt(result.groups.bet);
+        let betOn = parseInt(result.groups.on);
+        let game = games.get("dice", msg.chat.id);
+
+        if (valueToBet && valueToBet > 0 && [1,2,3,4,5,6].indexOf(betOn) != -1) {
+            if (state.users[msg.from.id] < valueToBet) {
+                api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
+            }
+            else {
+                game.roll(valueToBet, betOn, msg.from.id, msg.from.first_name, state, api, msg.chat.id);
+            }
+        }
+    })
+    .build();
+
+
+    let diceLogCommand = new CommandBuilder("Dice.Log")
+    .on("куб лог")
+    .do((state, api, msg, result) => {
+        let game = games.get("dice", msg.chat.id);
+
+        game.showLog(api, msg.chat.id);
+    })
+    .build();
+
 let commands = [balanceCommand, 
     logCommand, 
     plusCommand, 
@@ -215,9 +246,12 @@ let commands = [balanceCommand,
     banditCommand,
     auctionCommand,
     helpCommand,
-    promoCommand];
+    promoCommand,
+    diceCommand,
+    diceLogCommand];
 commands.forEach(cmd => bot.addCommand(cmd));
 
 games.addGame("roullete", () => new Roullete());
 games.addGame("auction", () => new Auction());
 games.addGame("bandit", () => new Bandit());
+games.addGame("dice", () => new Dice());
