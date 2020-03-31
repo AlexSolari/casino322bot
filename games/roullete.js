@@ -99,7 +99,30 @@ class Roullete {
         api.save();
     }
 
+    start(api, chatId){
+        if (this.state == STATE.Idle){
+            api.send("🎲 Минирулетка\n\
+Угадайте число из: \n\
+0💚 \n\
+1🔴 2⚫️ 3🔴 4⚫️ 5🔴 6⚫️\n\
+7🔴 8⚫️ 9🔴10⚫️11🔴12⚫️", charId);
+            this.state = STATE.Betting;
+        }
+        else{
+            api.send("🎲 Рулетка уже запущена, делайте ставки", chatId);
+        }
+    }
+
+    showLog(state, api, chatId){
+        let reply = "💬 Лог:\n";
+        (state.log[msg.chat.id] || []).forEach(e => {
+            reply += `${e} ${e == 0 ? '💚' : (e % 2 ? '🔴' : '⚫️')}\n`;
+        })
+        api.send(reply, chatId);
+    }
+
     bet(on, value, userId, userName) {
+        state.users[userId] -= value;
         this.bets.push({ on, value, userId, userName });
     }
 
