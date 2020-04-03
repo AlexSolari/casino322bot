@@ -8,6 +8,7 @@ class Bot {
         this.state = {
             log: {},
             users: {},
+            activeCredits: [],
         };
 
         this.restrictedUsers = [];
@@ -25,7 +26,8 @@ class Bot {
         callback = callback || (() => { });
         fs.writeFile('save.json', JSON.stringify({
             users: this.state.users,
-            log: this.state.log
+            log: this.state.log,
+            activeCredits: this.state.activeCredits,
         }), 'utf8', callback);
     }
 
@@ -37,6 +39,7 @@ class Bot {
                 let loadedData = JSON.parse(data);
                 this.state.users = loadedData.users || {};
                 this.state.log = loadedData.log || {};
+                this.state.activeCredits = loadedData.activeCredits || [];
             }
         });
     }

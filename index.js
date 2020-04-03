@@ -12,6 +12,41 @@ let bot = require("./entities/bot");
 const STATE = require("./helpers/roulleteState");
 
 let generalCommands = (() => {
+    let creditCommand = new CommandBuilder("General.Credit")
+        .on(/кредит (?<bet>\d+)/i)
+        .do((state, api, msg, result) => {
+            let valueToBet = parseInt(result.groups.bet);
+
+            if (valueToBet) {
+                let maxCredit = Math.floor(Math.max(1000, 1000 + state.users[msg.from.id]*0.15));
+
+                if (valueToBet < 0 || valueToBet > maxCredit) {
+                    api.send(`💰 ${msg.from.first_name}, сумма кредита может быть от 1 до ${maxCredit}.`, msg.chat.id);
+                }
+                else {
+                    if (state.activeCredits.indexOf(msg.from.id) != -1){
+                        api.send(`💰 ${msg.from.first_name}, прежде чем брать новый кредит, отдай старый.`, msg.chat.id);
+                    }
+                    else if (state.users[msg.from.id] <= -500){
+                        api.send(`💰 ${msg.from.first_name}, нельзя брать кредит имея более 500 монет долга.`, msg.chat.id);
+                    }
+                    else{
+                        state.activeCredits.push(msg.from.id);
+                        state.users[msg.from.id] += valueToBet;
+                        api.send(`💰 ${msg.from.first_name}, взял кредит в ${valueToBet} монет. Спустя минуту с тебя снимут сумму с процентами (5%).`, msg.chat.id);
+                        
+                        setTimeout(() => {
+                            state.users[msg.from.id] -= Math.ceil(valueToBet * 1.05);
+                            state.activeCredits = state.activeCredits.filter(x => x != msg.from.id);
+                            api.send(`💰 С ${msg.from.first_name} снято ${Math.ceil(valueToBet * 1.05)} монет.`, msg.chat.id);
+                            api.save();
+                        }, 60000);
+                    }
+                }
+            }
+        })
+        .build();
+
     let balanceCommand = new CommandBuilder("General.Balance")
         .on("баланс")
         .do((state, api, msg) => {
@@ -88,6 +123,7 @@ let generalCommands = (() => {
             message += " - *аукцион [ставка]* _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
             message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
             message += " - *промо [код]* _(активация промокода)_\n";
+            message += " - *кредит [сумма]* _(отдолжить у бота деняк)_\n";
             api.send(message, msg.chat.id);
         }).build();
 
@@ -106,6 +142,7 @@ let generalCommands = (() => {
         .build();
 
     return [balanceCommand,
+        creditCommand,
         plusCommand,
         topCommand,
         bottomCommand,
@@ -156,7 +193,7 @@ let roulleteCommands = (() => {
         .build();
 
     let betCommand = new CommandBuilder("Roullete.Bet")
-        .on(/(?<bet>\d+) (?<on>\S+)/i)
+        .on(/^(?<bet>\d+) (?<on>\S+)/i)
         .when((state, msg) => {
             let game = games.get("roullete", msg.chat.id);
 
@@ -239,7 +276,7 @@ let auctionCommands = (() => {
 
 let diceCommands = (() => {
     let diceCommand = new CommandBuilder("Dice.Roll")
-        .on(/куб (?<bet>\d+) (?<on>\d)/i)
+        .on(/^куб (?<bet>\d+) (?<on>\d)/i)
         .do((state, api, msg, result) => {
             let valueToBet = parseInt(result.groups.bet);
             let betOn = parseInt(result.groups.on);
