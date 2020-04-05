@@ -5,7 +5,7 @@ class BotApiHelper {
     }
 
     sendRollingMessage(chatId) {
-        let getRandomRollValue = (min, max) => {
+        /*let getRandomRollValue = (min, max) => {
             min = 0;
             max = 12;
             let number = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -27,19 +27,28 @@ class BotApiHelper {
                 setTimeout(() => this.bot.editMessageText({ chatId, messageId: x.message_id }, getRandomRollValue()), 4000);
                 setTimeout(() => this.bot.editMessageText({ chatId, messageId: x.message_id }, getRandomRollValue()), 5000);
                 setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), 6000);
-            });
+            });*/
 
+    }
+
+    getUserStatus(userId){
+        return {
+            isRestricted: this.botWrapper.restrictedUsers.indexOf(userId) != -1,
+            balance: this.botWrapper.state.users[userId],
+            hasActiveCredits: this.botWrapper.state.activeCredits.indexOf(userId) != -1
+        }
     }
 
     send(text, chatId) {
         return this.bot.sendMessage(chatId, text, { parseMode: "Markdown" })
-            .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), 60000));
+            .catch(e => console.error(e));
     }
 
     gif(name, timeout, chatId) {
         let path = `./content/${name}.mp4`;
         return this.bot.sendAnimation(chatId, path)
-            .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), timeout));
+            .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), timeout))
+            .catch(e => console.error(e));
     }
 
     save() {
@@ -52,7 +61,7 @@ class BotApiHelper {
 
     forward(chatId, fromChatId, msgId) {
         return this.bot.forwardMessage(chatId, fromChatId, msgId)
-        .then(x => setTimeout(() => this.bot.deleteMessage(chatId, x.message_id), 60000));
+        .catch(e => console.error(e));
     }
 }
 

@@ -57,7 +57,7 @@ class Bot {
         });
         this.api = new BotApiHelper(this);
         this.bot.on('text', (msg) => {
-            console.log(`${msg.chat.title || "DM"} | ${msg.from.first_name}: ${msg.text}`);
+            console.log(`${msg.chat.title || "DM"} | ${msg.from.first_name} (${msg.from.id}): ${msg.text}`);
             this.commandQueue.push(msg);
         });
 
@@ -84,7 +84,7 @@ class Bot {
         recentMessagesFromUser.shift();
 
         if (recentMessagesFromUser.indexOf(msg.text) == -1){
-            let points = msg.text.length > 25 ? 25 : msg.text.length;
+            let points = msg.text.length > 10 ? 10 : msg.text.length;
             this.state.users[msg.from.id] += (this.restrictedUsers.indexOf(msg.from.id) == -1) 
                 ? points 
                 : 1;

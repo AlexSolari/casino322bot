@@ -47,6 +47,18 @@ let generalCommands = (() => {
         })
         .build();
 
+    let statusCommand = new CommandBuilder("General.Status")
+        .on("статус")
+        .do((state, api, msg) => {
+            let status = api.getUserStatus(msg.from.id);
+            let m = `🏦 Инфо про юзера ${msg.from.first_name}\n`;
+            m += `Баланс: ${status.balance}\n`;
+            m += `Есть активный кредит: ${(status.hasActiveCredits) ? "Да" : "Нет"}\n`;
+            m += `Наказание за спам: ${(status.isRestricted) ? "Да" : "Нет"}\n`;
+            api.send(m, msg.chat.id);
+        })
+        .build();
+
     let balanceCommand = new CommandBuilder("General.Balance")
         .on("баланс")
         .do((state, api, msg) => {
@@ -90,6 +102,28 @@ let generalCommands = (() => {
         })
         .build();
 
+    let listCommand = new CommandBuilder("General.List")
+        .on("весьсписок")
+        .do((state, api, msg, result) => {
+            let keys = Object.keys(state.users);
+            let promises = [];
+            let users = keys.map(x => {
+                promises.push(api.getUser(x, msg.chat.id));
+            })
+            allSettled(promises).then(res => {
+                let mapped = res.filter(u => u.status == "fulfilled").map(u => u.value.user).map(u => {
+                    return { user: u, points: state.users[u.id] }
+                }).sort((x, y) => y.points - x.points);
+
+                let topmsg = "💰 Список 💰\n\n";
+                mapped.forEach(u => {
+                    topmsg += `${mapped.indexOf(u) + 1}) ${u.user.first_name} - ${u.points}\n`;
+                })
+                api.send(topmsg, msg.chat.id);
+            });
+        })
+        .build();
+
     let bottomCommand = new CommandBuilder("General.Bottom")
         .on("боттом")
         .do((state, api, msg, result) => {
@@ -124,6 +158,7 @@ let generalCommands = (() => {
             message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
             message += " - *промо [код]* _(активация промокода)_\n";
             message += " - *кредит [сумма]* _(отдолжить у бота деняк)_\n";
+            message += " - *статус* _(информация про аккаунт)_\n";
             api.send(message, msg.chat.id);
         }).build();
 
@@ -147,7 +182,9 @@ let generalCommands = (() => {
         topCommand,
         bottomCommand,
         helpCommand,
-        promoCommand];
+        promoCommand,
+        listCommand,
+        statusCommand];
 })();
 
 let roulleteCommands = (() => {
