@@ -39,6 +39,10 @@ class BotApiHelper {
         }
     }
 
+    dice(chatId){
+        return this.bot.sendDice(chatId);
+    }
+
     send(text, chatId) {
         return this.bot.sendMessage(chatId, text, { parseMode: "Markdown" })
             .catch(e => console.error(e));

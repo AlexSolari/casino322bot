@@ -89,7 +89,7 @@ let generalCommands = (() => {
                 promises.push(api.getUser(x, msg.chat.id));
             })
             allSettled(promises).then(res => {
-                let mapped = res.filter(u => u.status == "fulfilled").map(u => u.value.user).map(u => {
+                let mapped = res.filter(u => u.status == "fulfilled").filter(u => u.value.status != "left").map(u => u.value.user).map(u => {
                     return { user: u, points: state.users[u.id] }
                 }).sort((x, y) => y.points - x.points).slice(0, 5);
 
@@ -133,7 +133,7 @@ let generalCommands = (() => {
                 promises.push(api.getUser(x, msg.chat.id));
             })
             allSettled(promises).then(res => {
-                let mapped = res.filter(u => u.status == "fulfilled").map(u => u.value.user).map(u => {
+                let mapped = res.filter(u => u.status == "fulfilled").filter(u => u.value.status != "left").map(u => u.value.user).map(u => {
                     return { user: u, points: state.users[u.id] }
                 }).filter(x => x.points).sort((x, y) => x.points - y.points).slice(0, 5);
 
