@@ -120,3 +120,5 @@ save.json
 promos.json
 save_backup.json
 backup.ps1
+key.ppk
+MyKeyPair.pem

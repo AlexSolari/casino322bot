@@ -6,6 +6,8 @@ class Roullete {
         this.bets = [];
         this.availibleBets = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '0', 'к', "ч", "1-3", '4-6', '7-9', '10-12'];
         this.state = STATE.Idle;
+
+        this.autoStart = false;
     }
 
     getRandomInt(min, max) {
@@ -39,6 +41,25 @@ class Roullete {
             awardRanges.push(new AwardModel(rangeValue, 4));
         }
         return awardRanges;
+    }
+
+    showBets(api, chatId){
+        var resultMessage = `🎲 Текущие ставки:\n`;
+
+        this.bets.forEach(bet => {
+            let onMarker = bet.on;
+
+            if (bet.on == 'к')
+                onMarker = '🔴';
+            if (bet.on == 'ч')
+                onMarker = '⚫️';
+            if (bet.on == '0')
+                onMarker = '💚';
+
+            resultMessage += `${bet.userName} ${bet.value} на ${(onMarker)}\n`;
+        });
+
+        api.send(resultMessage, chatId);
     }
 
     showResults(value, state, api, wins, chatId) {

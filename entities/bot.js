@@ -78,7 +78,7 @@ class Bot {
             recentMessagesFromUser = this.recentMessages[msg.chat.id] = [];
 
         if (this.state.users[msg.from.id] == undefined)
-            this.state.users[msg.from.id] = 300;
+            this.state.users[msg.from.id] = 3000;
 
         if (recentMessagesFromUser.length > 50)
         recentMessagesFromUser.shift();

@@ -189,6 +189,17 @@ let generalCommands = (() => {
 
 let roulleteCommands = (() => {
 
+    let autostartCommand = new CommandBuilder("Roullete.AutostartToggle")
+        .on("рулетка автостарт")
+        .do((state, api, msg) => {
+            let game = games.get("roullete", msg.chat.id);
+            
+            game.autoStart = !game.autoStart;
+            let newStatus = (game.autoStart) ? "включен" : "выключен";
+            api.send(`Автостарт рулетки ${newStatus}`, msg.chat.id);
+        })
+        .build();
+
     let logCommand = new CommandBuilder("Roullete.Log")
         .on("лог")
         .do((state, api, msg) => {
@@ -203,6 +214,14 @@ let roulleteCommands = (() => {
         .do((state, api, msg, result) => {
             let game = games.get("roullete", msg.chat.id);
             game.start(api, msg.chat.id);
+        })
+        .build();
+
+    let betsCommand = new CommandBuilder("Roullete.BetsInfo")
+        .on("ставки")
+        .do((state, api, msg, result) => {
+            let game = games.get("roullete", msg.chat.id);
+            game.showBets(api, msg.chat.id);
         })
         .build();
 
@@ -225,6 +244,9 @@ let roulleteCommands = (() => {
 
             setTimeout(() => {
                 game.roll(state, api, msg.chat.id);
+                setTimeout(() => {
+                    game.start(api, msg.chat.id);
+                }, 1000);
             }, 6500)
         })
         .build();
@@ -265,7 +287,7 @@ let roulleteCommands = (() => {
     return [logCommand,
         roulleteCommand,
         betCommand,
-        goCommand];
+        goCommand,autostartCommand,betsCommand];
 })();
 
 let banditCommands = (() => {

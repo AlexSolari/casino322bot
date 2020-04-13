@@ -1,7 +1,7 @@
 class Bandit {
     constructor() {
         this.onCooldown = false;
-        this.wheelValues = ['💰', '💩', '💩', '💩', '🗑️','🗑️','🗑️', '🔥','🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '❤️', '❤️', '❤️', '❤️', '🍆', '🍆', '🍀'];
+        this.wheelValues = ['💰', '💩', '💩', '💩', '🗑️','🗑️','🗑️','🗑️', '🔥','🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '🔥', '❤️', '❤️', '❤️', '❤️', '🍆', '🍆', '🍀'];
     }
 
     roll(value, userId, userName, state, api, chatId) {
@@ -23,26 +23,26 @@ class Bandit {
 
         let coeff = 1;
         if (top.length > 1) {
-            coeff += (1.2 * top.length);
+            coeff += (0.4 * top.length);
         } 
         
         if (high.length > 1) {
-            coeff += (0.8 * high.length);
+            coeff += (0.3 * high.length);
         } 
         
         if (mid.length > 1) {
-            coeff += (0.3 * mid.length);
+            coeff += (0.2 * mid.length);
         } 
         
         if (low.length > 1) {
-            coeff += (0.15 * low.length);
+            coeff += (0.1 * low.length);
         }
         
         if (coeff == 1)
             coeff = 0;
         
         if (top.length == 3 || high.length == 3 || mid.length == 3 || low.length == 3)
-            coeff += 1.5;
+            coeff += 5;
 
         let bonus = rolls.filter(x => x == '💰');
 
