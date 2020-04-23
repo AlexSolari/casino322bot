@@ -3,14 +3,19 @@ const {
   } = require('perf_hooks');
 
 class Command{
-    constructor(trigger, condition, handler, name){
+    constructor(trigger, condition, handler, name, active){
         this.trigger = trigger;
         this.condition = condition;
         this.handler = handler;
         this.name = name;
+
+        this.active = active;
     }
 
     exec(message, state, api, botMessage){
+        if (!this.active)
+            return;
+
         let shouldTrigger = false;
         let matchResult = null;
         

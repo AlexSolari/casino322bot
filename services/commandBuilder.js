@@ -4,6 +4,7 @@ class CommandBuilder{
     constructor(name){
         this.name = name;
         this.trigger = null;
+        this.active = true;
         this.condition = () => true;
         this.handler = () => {};
     }
@@ -26,8 +27,14 @@ class CommandBuilder{
         return this;
     }
 
+    disabled(){
+        this.active = false;
+
+        return this;
+    }
+
     build(){
-        return new Command(this.trigger, this.condition, this.handler, this.name);
+        return new Command(this.trigger, this.condition, this.handler, this.name, this.active);
     }
 }
 

@@ -48,6 +48,11 @@ class BotApiHelper {
             .catch(e => console.error(e));
     }
 
+    reply(text, chatId, replyId){
+        return this.bot.sendMessage(chatId, text, { parseMode: "Markdown", replyToMessage: replyId })
+            .catch(e => console.error(e));
+    }
+
     gif(name, timeout, chatId) {
         let path = `./content/${name}.mp4`;
         return this.bot.sendAnimation(chatId, path)

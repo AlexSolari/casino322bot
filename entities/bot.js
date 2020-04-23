@@ -49,6 +49,8 @@ class Bot {
     }
 
     start(token) {
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
         this.bot = new TeleBot({
             token: token,
             polling: {
@@ -63,12 +65,13 @@ class Bot {
 
         this.bot.start();
 
-        setInterval(() => {
+        setInterval(async () => {
             while (this.commandQueue.length > 0) {
                 let queuedMsg = this.commandQueue.shift();
                 this.dequeue(queuedMsg);
+                await sleep(50);
             }
-        }, 333);
+        }, 500);
     }
 
     dequeue(msg) {

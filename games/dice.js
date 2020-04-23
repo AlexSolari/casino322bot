@@ -21,7 +21,7 @@ class Dice {
                 resultMessage = `${userName} выиграл ${value * 6}`;
                 state.users[userId] += value * 6;
             }
-            setTimeout(x => api.send(resultMessage, chatId), 2500);
+            setTimeout(x => api.reply(resultMessage, chatId, r.message_id), 2500);
         });
     }
 

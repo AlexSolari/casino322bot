@@ -45,6 +45,7 @@ let generalCommands = (() => {
                 }
             }
         })
+        .disabled()
         .build();
 
     let statusCommand = new CommandBuilder("General.Status")
@@ -122,6 +123,7 @@ let generalCommands = (() => {
                 api.send(topmsg, msg.chat.id);
             });
         })
+        .disabled()
         .build();
 
     let bottomCommand = new CommandBuilder("General.Bottom")
@@ -154,11 +156,8 @@ let generalCommands = (() => {
             message += " - *топ*  _(топ чата по балансу на текущий момент)_\n";
             message += " - *рулетка [ставка]* _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
             message += " - *бандит [ставка]* _(классика игровых слотов)_\n";
-            message += " - *аукцион [ставка]* _(ставки от всех желающих, владелец самой высокой ставки забирает весь банк себе)_\n";
             message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
             message += " - *промо [код]* _(активация промокода)_\n";
-            message += " - *кредит [сумма]* _(отдолжить у бота деняк)_\n";
-            message += " - *статус* _(информация про аккаунт)_\n";
             api.send(message, msg.chat.id);
         }).build();
 
@@ -328,6 +327,7 @@ let auctionCommands = (() => {
                 }
             }
         })
+        .disabled()
         .build();
 
     return [auctionCommand];
