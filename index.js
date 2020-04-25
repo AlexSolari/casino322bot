@@ -53,10 +53,17 @@ let generalCommands = (() => {
         .on("статус")
         .do((state, api, msg) => {
             let status = api.getUserStatus(msg.from.id);
+
+            let rewardBase = 1000;
+            let coeff = Math.pow(1.1, status.bonus.streak + 1);
+            let nextBonus = Math.floor(rewardBase * (coeff));
+            let oneDay = 1 * 20 * 60 * 60 * 1000; //20 hours to make exp. more smooth
+            let dayAgo = Date.now() - oneDay;
+
             let m = `🏦 Инфо про юзера ${msg.from.first_name}\n`;
             m += `Баланс: ${status.balance}\n`;
-            m += `Есть активный кредит: ${(status.hasActiveCredits) ? "Да" : "Нет"}\n`;
-            m += `Наказание за спам: ${(status.isRestricted) ? "Да" : "Нет"}\n`;
+            m += `Следующий бонус: ${nextBonus}\n`;
+            m += `Бонус можно забрать через ${Math.ceil(Math.abs(new Date(status.bonus.lastClaimed) - dayAgo) / 36e5)} часов.\b`
             api.send(m, msg.chat.id);
         })
         .build();
@@ -88,7 +95,7 @@ let generalCommands = (() => {
                 let reward = Math.floor(rewardBase * coeff);
 
                 state.users[msg.from.id] += reward;
-                api.send(`🎁 ${msg.from.first_name} забирает ежедненый бонус в ${reward} монет.`, msg.chat.id);
+                api.send(`🎁 ${msg.from.first_name} забирает еждневный бонус в ${reward} монет.`, msg.chat.id);
 
                 state.bonuses[msg.from.id] = new BonusModel(currentDate, bonusInfo.streak + 1);
             }
@@ -185,8 +192,9 @@ let generalCommands = (() => {
         .do((state, api, msg, result) => {
             let message = "❓ *Актуальные команды бота* ❓\n";
             message += " - *баланс* _(показывает ваш актуальный баланс)_\n";
+            message += " - *бонус* _(забирает ежедневный бонус)_\n";
             message += " - *топ*  _(топ чата по балансу на текущий момент)_\n";
-            message += " - *рулетка [ставка]* _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
+            message += " - *рулетка [ставка] [значение]* _(числа от 0 до 12, выбери правильный цвет или число и получи приз)_\n";
             message += " - *бандит [ставка]* _(классика игровых слотов)_\n";
             message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
             message += " - *промо [код]* _(активация промокода)_\n";

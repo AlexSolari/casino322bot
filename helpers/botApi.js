@@ -8,7 +8,7 @@ class BotApiHelper {
         return {
             isRestricted: this.botWrapper.restrictedUsers.indexOf(userId) != -1,
             balance: this.botWrapper.state.users[userId],
-            hasActiveCredits: this.botWrapper.state.activeCredits.indexOf(userId) != -1
+            bonus: this.botWrapper.state.bonuses[userId],
         }
     }
 
