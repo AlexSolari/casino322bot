@@ -5,6 +5,7 @@ let Roullete = require("./games/roullete");
 let Bandit = require("./games/bandit");
 let Auction = require("./games/auction");
 let Dice = require("./games/dice");
+let BonusModel = require("./helpers/bonusModel");
 
 let games = require("./services/gamestore");
 let promos = require("./services/promoService");
@@ -67,6 +68,36 @@ let generalCommands = (() => {
         })
         .build();
 
+    let bonusCommand = new CommandBuilder("General.Bonus")
+        .on(["монеты", "бонус", "дейлик"])
+        .do((state, api, msg) => {
+            let currentDate = new Date();
+            let oneDay = 1 * 20 * 60 * 60 * 1000; //20 hours to make exp. more smooth
+            let dayAgo = Date.now() - oneDay;
+
+            let bonusInfo = state.bonuses[msg.from.id];
+            
+            if ( !bonusInfo || (dayAgo > bonusInfo.lastClaimed) ){
+                if (!bonusInfo){
+                    bonusInfo = new BonusModel(currentDate, 0);
+                }
+
+                let rewardBase = 1000;
+                let coeff = Math.pow(1.1, bonusInfo.streak);
+
+                let reward = Math.floor(rewardBase * coeff);
+
+                state.users[msg.from.id] += reward;
+                api.send(`🎁 ${msg.from.first_name} забирает ежедненый бонус в ${reward} монет.`, msg.chat.id);
+
+                state.bonuses[msg.from.id] = new BonusModel(currentDate, bonusInfo.streak + 1);
+            }
+            else{
+                api.send(`😥 ${msg.from.first_name}, ты уже забирал свой бонус! Попробуй через ${Math.ceil(Math.abs(new Date(bonusInfo.lastClaimed) - dayAgo) / 36e5)} часов.`, msg.chat.id);
+            }
+        })
+        .build();
+
     let plusCommand = new CommandBuilder("General.Plus")
         .on(/^\+(?<p>\d*).*/gim)
         .when((state, msg) => !!msg.reply_to_message)
@@ -101,6 +132,7 @@ let generalCommands = (() => {
                 api.send(topmsg, msg.chat.id);
             });
         })
+        .disabled()
         .build();
 
     let listCommand = new CommandBuilder("General.List")
@@ -158,7 +190,7 @@ let generalCommands = (() => {
             message += " - *бандит [ставка]* _(классика игровых слотов)_\n";
             message += " - *куб [ставка] [сторона кубика]* _(числа от 1 до 6)_\n";
             message += " - *промо [код]* _(активация промокода)_\n";
-            api.send(message, msg.chat.id);
+            api.send(message, msg.chat.id, true);
         }).build();
 
     let promoCommand = new CommandBuilder("General.Promo")
@@ -175,15 +207,17 @@ let generalCommands = (() => {
         })
         .build();
 
-    return [balanceCommand,
-        creditCommand,
-        plusCommand,
-        topCommand,
-        bottomCommand,
-        helpCommand,
-        promoCommand,
-        listCommand,
-        statusCommand];
+    return [balanceCommand
+        ,creditCommand
+        ,plusCommand
+        ,topCommand
+        ,bottomCommand
+        ,helpCommand
+        ,promoCommand
+        ,listCommand
+        ,statusCommand
+        ,bonusCommand
+    ];
 })();
 
 let roulleteCommands = (() => {
@@ -207,6 +241,32 @@ let roulleteCommands = (() => {
         })
         .build();
 
+    let cancelCommand = new CommandBuilder("Roullete.CancelBet")
+        .on(["отмена", "отменить"])
+        .do((state, api, msg) => {
+            let game = games.get("roullete", msg.chat.id);
+
+            game.cancel(msg.from.id, state, api, msg.chat.id);
+        })
+        .build();
+        
+    let doubleCommand = new CommandBuilder("Roullete.Double")
+        .on("удвоить")
+        .do((state, api, msg) => {
+            let game = games.get("roullete", msg.chat.id);
+
+            game.double(msg.from.id, state, api, msg.chat.id);
+        })
+        .build();
+
+    let repeatCommand = new CommandBuilder("Roullete.Repeat")
+        .on(["повтор", "повторить"])
+        .do((state, api, msg) => {
+            let game = games.get("roullete", msg.chat.id);
+
+            game.repeat(msg.from.id, state, api, msg.chat.id);
+        })
+        .build();
 
     let roulleteCommand = new CommandBuilder("Roullete.Start")
         .on("рулетка")
@@ -225,7 +285,7 @@ let roulleteCommands = (() => {
         .build();
 
     let goCommand = new CommandBuilder("Roullete.Spin")
-        .on("го")
+        .on(["го", "крутить"])
         .when((state, msg) => {
             let game = games.get("roullete", msg.chat.id);
 
@@ -234,12 +294,15 @@ let roulleteCommands = (() => {
         .do((state, api, msg, result) => {
 
             let game = games.get("roullete", msg.chat.id);
-            let gifToShow = Math.random() > 0.1 ? "roulette" : "rare_spin";
+            let gifToShow = Math.random() > 0.6 
+                ? "roulette" 
+                : Math.random() > 0.3 
+                    ? "roulette2"
+                    : "roulette3";
 
             game.state = STATE.Spinning;
             api.send("🎲 Крутим...", msg.chat.id);
             api.gif(gifToShow, 5000, msg.chat.id);
-            api.sendRollingMessage(msg.chat.id);
 
             setTimeout(() => {
                 game.roll(state, api, msg.chat.id);
@@ -267,26 +330,22 @@ let roulleteCommands = (() => {
                     api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
                 }
                 else {
-                    game.bet(betOn, valueToBet, msg.from.id, msg.from.first_name, state);
-
-                    let onMarker = betOn;
-                    if (betOn == 'к')
-                        onMarker = '🔴';
-                    if (betOn == 'ч')
-                        onMarker = '⚫️';
-                    if (betOn == '0')
-                        onMarker = '💚';
-
-                    api.send(`🎲 Ставка принята: ${msg.from.first_name} ${valueToBet} на ${onMarker}`, msg.chat.id);
+                    game.bet(betOn, valueToBet, msg.from.id, msg.from.first_name, state, msg.chat.id, api);
                 }
             }
         })
         .build();
 
-    return [logCommand,
-        roulleteCommand,
-        betCommand,
-        goCommand,autostartCommand,betsCommand];
+    return [logCommand
+        ,roulleteCommand
+        ,betCommand
+        ,goCommand
+        ,autostartCommand
+        ,betsCommand
+        ,cancelCommand
+        ,doubleCommand
+        ,repeatCommand
+    ];
 })();
 
 let banditCommands = (() => {

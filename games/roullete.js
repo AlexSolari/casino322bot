@@ -1,14 +1,19 @@
 const STATE = require("../helpers/roulleteState");
 let AwardModel = require("../helpers/roulleteAwardModel");
+let BetModel = require("../helpers/roulleteBetModel");
 
 class Roullete {
     constructor() {
         this.bets = [];
+        this.prevGameBets = [];
         this.availibleBets = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '0', 'к', "ч", "1-3", '4-6', '7-9', '10-12'];
         this.state = STATE.Idle;
 
         this.autoStart = false;
     }
+    ///
+    /// Internals
+    ///
 
     getRandomInt(min, max) {
         min = Math.ceil(min);
@@ -41,25 +46,6 @@ class Roullete {
             awardRanges.push(new AwardModel(rangeValue, 4));
         }
         return awardRanges;
-    }
-
-    showBets(api, chatId){
-        var resultMessage = `🎲 Текущие ставки:\n`;
-
-        this.bets.forEach(bet => {
-            let onMarker = bet.on;
-
-            if (bet.on == 'к')
-                onMarker = '🔴';
-            if (bet.on == 'ч')
-                onMarker = '⚫️';
-            if (bet.on == '0')
-                onMarker = '💚';
-
-            resultMessage += `${bet.userName} ${bet.value} на ${(onMarker)}\n`;
-        });
-
-        api.send(resultMessage, chatId);
     }
 
     showResults(value, state, api, wins, chatId) {
@@ -99,8 +85,38 @@ class Roullete {
             api.gif("noone", 10000, chatId);
         }
 
+        this.prevGameBets = this.bets;
         this.bets = [];
         api.save();
+    }
+
+    getLastBetOfUser(userId){
+        let betsByUser = this.bets.filter(x => x.userId == userId);
+        
+        return betsByUser.pop();
+    }
+
+    ///
+    /// Externals
+    ///
+
+    showBets(api, chatId){
+        var resultMessage = `🎲 Текущие ставки:\n`;
+
+        this.bets.forEach(bet => {
+            let onMarker = bet.on;
+
+            if (bet.on == 'к')
+                onMarker = '🔴';
+            if (bet.on == 'ч')
+                onMarker = '⚫️';
+            if (bet.on == '0')
+                onMarker = '💚';
+
+            resultMessage += `${bet.userName} ${bet.value} на ${(onMarker)}\n`;
+        });
+
+        api.send(resultMessage, chatId);
     }
 
     start(api, chatId) {
@@ -125,9 +141,71 @@ class Roullete {
         api.send(reply, chatId);
     }
 
-    bet(on, value, userId, userName, state) {
+    bet(on, value, userId, userName, state, chatId, api) {
         state.users[userId] -= value;
-        this.bets.push({ on, value, userId, userName });
+
+        let onMarker = on;
+        if (on == 'к')
+            onMarker = '🔴';
+        if (on == 'ч')
+            onMarker = '⚫️';
+        if (on == '0')
+            onMarker = '💚';
+
+        api.send(`🎲 Ставка принята: ${userName} ${value} на ${onMarker}`, chatId);
+
+        this.bets.push(new BetModel(on, value, userId, userName));
+    }
+
+    cancel(userId, state, api, chatId){
+        let lastBet = this.getLastBetOfUser(userId);
+
+        if (lastBet){
+            this.bets = this.bets.filter(x => x.id != lastBet.id);
+            state.users[userId] += lastBet.value;
+
+            let onMarker = lastBet.on;
+
+            if (lastBet.on == 'к')
+                onMarker = '🔴';
+            if (lastBet.on == 'ч')
+                onMarker = '⚫️';
+            if (lastBet.on == '0')
+                onMarker = '💚';
+
+            let resultMessage = `❌ Ставка "${lastBet.value} на ${onMarker}" отменена`;
+
+            api.send(resultMessage, chatId);
+        }
+    }
+
+    double(userId, state, api, chatId){
+        let lastBet = this.getLastBetOfUser(userId);
+        if (lastBet){
+            if (lastBet.value > state.users[userId]){
+                api.send(`🎲 Не хватает монет для удвоения ставки. Баланс ${state.users[userId]}, ставка ${lastBet.value}`, chatId);
+            }
+            else{
+                this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
+            }
+        }
+    }
+
+    repeat(userId, state, api, chatId){
+        let betsFromPrevGame = this.prevGameBets.filter(x => x.userId == userId);
+
+        if (betsFromPrevGame && betsFromPrevGame.length > 0){
+            let totalValue = betsFromPrevGame.map(x => x.value).reduce((a, b) => a + b, 0);
+
+            if (totalValue > state.users[userId]){
+                api.send(`🎲 Не хватает монет для повторения ставок. Баланс ${state.users[userId]}, нужно ${totalValue}`, chatId);
+            }
+            else{
+                betsFromPrevGame.forEach(lastBet => {
+                    this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
+                })
+            }
+        }
     }
 
     roll(state, api, chatId) {
