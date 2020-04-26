@@ -59,11 +59,14 @@ let generalCommands = (() => {
             let nextBonus = Math.floor(rewardBase * (coeff));
             let oneDay = 1 * 20 * 60 * 60 * 1000; //20 hours to make exp. more smooth
             let dayAgo = Date.now() - oneDay;
+            let canClaim = (new Date(new Date(status.bonus.lastClaimed).getTime() + oneDay) <= Date.now());
 
             let m = `🏦 Инфо про юзера ${msg.from.first_name}\n`;
             m += `Баланс: ${status.balance}\n`;
             m += `Следующий бонус: ${nextBonus}\n`;
-            m += `Бонус можно забрать через ${Math.ceil(Math.abs(new Date(status.bonus.lastClaimed) - dayAgo) / 36e5)} часов.\b`
+            m += canClaim 
+                ? `Бонус можно забрать.\n`
+                : `Бонус можно забрать через ${Math.ceil(Math.abs(new Date(status.bonus.lastClaimed) - dayAgo) / 36e5)} часов.\n`
             api.send(m, msg.chat.id);
         })
         .build();
@@ -84,7 +87,7 @@ let generalCommands = (() => {
 
             let bonusInfo = state.bonuses[msg.from.id];
             
-            if ( !bonusInfo || (dayAgo > bonusInfo.lastClaimed) ){
+            if ( !bonusInfo || (new Date(new Date(bonusInfo.lastClaimed).getTime() + oneDay) <= currentDate) ){
                 if (!bonusInfo){
                     bonusInfo = new BonusModel(currentDate, 0);
                 }
