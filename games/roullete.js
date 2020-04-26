@@ -142,6 +142,10 @@ class Roullete {
     }
 
     bet(on, value, userId, userName, state, chatId, api) {
+        let existingBets = this.bets.filter(x => x.userId == userId);
+        if (existingBets.length >= 5)
+            return "😥 Нельзя делать более 5 ставок от одного человека."
+
         state.users[userId] -= value;
 
         let onMarker = on;
@@ -152,9 +156,9 @@ class Roullete {
         if (on == '0')
             onMarker = '💚';
 
-        api.send(`🎲 Ставка принята: ${userName} ${value} на ${onMarker}`, chatId);
-
         this.bets.push(new BetModel(on, value, userId, userName));
+
+        return `🎲 Ставка принята: ${userName} ${value} на ${onMarker}\n`;
     }
 
     cancel(userId, state, api, chatId){
@@ -186,7 +190,9 @@ class Roullete {
                 api.send(`🎲 Не хватает монет для удвоения ставки. Баланс ${state.users[userId]}, ставка ${lastBet.value}`, chatId);
             }
             else{
-                this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
+                let message = this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
+
+                api.send(message, chatId);
             }
         }
     }
@@ -201,9 +207,11 @@ class Roullete {
                 api.send(`🎲 Не хватает монет для повторения ставок. Баланс ${state.users[userId]}, нужно ${totalValue}`, chatId);
             }
             else{
+                let message = "";
                 betsFromPrevGame.forEach(lastBet => {
-                    this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
-                })
+                    message += this.bet(lastBet.on, lastBet.value, lastBet.userId, lastBet.userName, state, chatId, api);
+                });
+                api.send(message, chatId);
             }
         }
     }

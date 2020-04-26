@@ -341,7 +341,8 @@ let roulleteCommands = (() => {
                     api.send(`🎲 Ставка не может превышать 100% от твоих средств. Баланс ${state.users[msg.from.id]}, ставка ${valueToBet}`, msg.chat.id);
                 }
                 else {
-                    game.bet(betOn, valueToBet, msg.from.id, msg.from.first_name, state, msg.chat.id, api);
+                    let message = game.bet(betOn, valueToBet, msg.from.id, msg.from.first_name, state, msg.chat.id, api);
+                    api.send(message, msg.chat.id);
                 }
             }
         })

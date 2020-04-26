@@ -30,7 +30,7 @@ class Command{
         });
 
         if (shouldTrigger && this.condition(state, botMessage)){
-            console.log(` - Executing [${this.name}]`);
+            console.log(` - Executing [${this.name}] with arguments ${JSON.stringify(matchResult)}`);
             var t0 = performance.now();
             this.handler(state, api, botMessage, matchResult);
             var t1 = performance.now();
