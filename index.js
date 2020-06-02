@@ -55,7 +55,7 @@ let generalCommands = (() => {
             let status = api.getUserStatus(msg.from.id);
 
             let rewardBase = 1000;
-            let coeff = Math.pow(1.1, status.bonus.streak + 1);
+            let coeff = Math.pow(1.1, status.bonus.streak);
             let nextBonus = Math.floor(rewardBase * (coeff));
             let oneDay = 1 * 20 * 60 * 60 * 1000; //20 hours to make exp. more smooth
             let dayAgo = Date.now() - oneDay;
@@ -188,6 +188,7 @@ let generalCommands = (() => {
                 api.send(topmsg, msg.chat.id);
             });
         })
+        .disabled()
         .build();
 
     let helpCommand = new CommandBuilder("General.Help")
