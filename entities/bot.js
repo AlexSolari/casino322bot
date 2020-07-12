@@ -55,6 +55,7 @@ class Bot {
             token: token,
             polling: {
                 interval: 50,
+                limit: 10,
             }
         });
         this.api = new BotApiHelper(this);
