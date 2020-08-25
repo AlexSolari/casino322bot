@@ -74,7 +74,7 @@ let generalCommands = (() => {
     let balanceCommand = new CommandBuilder("General.Balance")
         .on("баланс")
         .do((state, api, msg) => {
-            api.send(`🏦 ${state.users[msg.from.id]}`, msg.chat.id);
+            api.reply(`🏦 ${state.users[msg.from.id]}`, msg.chat.id, msg.message_id);
         })
         .build();
 

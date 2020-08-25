@@ -2,6 +2,21 @@ class BotApiHelper {
     constructor(botWrapper) {
         this.botWrapper = botWrapper;
         this.bot = botWrapper.bot;
+        
+        this.messageQueue = [];
+
+        setInterval(() => {
+            this._dequeueMessage();
+        }, 35);
+    }
+
+    _dequeueMessage(){
+        let message = this.messageQueue.pop();
+
+        if (message){
+            this.bot.sendMessage(message.chatId, message.text, { parseMode: message.format ? "Markdown" : undefined, replyToMessage: message.replyId })
+                .catch(e => console.error(e));
+        }
     }
 
     getUserStatus(userId){
@@ -18,13 +33,22 @@ class BotApiHelper {
 
     send(text, chatId, format) {
         format = format || false;
-        return this.bot.sendMessage(chatId, text, { parseMode: format ? "Markdown" : undefined })
-            .catch(e => console.error(e));
+
+        this.messageQueue.push({
+            text,
+            chatId,
+            format,
+            replyId: undefined
+        });
     }
 
     reply(text, chatId, replyId){
-        return this.bot.sendMessage(chatId, text, { parseMode: "Markdown", replyToMessage: replyId })
-            .catch(e => console.error(e));
+        this.messageQueue.push({
+            text,
+            chatId,
+            format: false,
+            replyId
+        });
     }
 
     gif(name, timeout, chatId) {
